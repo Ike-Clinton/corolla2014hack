@@ -1,17 +1,16 @@
 #!/bin/bash
 # Display usage parameters
 display_usage() {
-	echo "This script must be run as super-user."
-	echo -e "\nUsage: \nsudo $0 [interface name] \n"
+	echo -e "\nUsage: \nsudo $0 \n"
 }
 
-if [ $# -le 1 ]
+if [ $# -ne 0 ]
 then
 	display_usage
 	exit 1
 fi
 # Check if user supplies --help or --h and show usage
-if [[ ( $# == "--help") || $# == "-h"]]
+if [[ ( $# == "--help") || $# == "-h" ]]
 then
 	display_usage
 	exit 0
@@ -22,4 +21,8 @@ if [ "$EUID" -ne 0 ]
 	exit
 fi
 # Begin script
-echo "All good!"
+
+# Create virtual CAN interface
+modprobe vcan
+ip link add vcan0 type vcan
+ip link set vcan0 up

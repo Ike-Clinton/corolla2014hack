@@ -6,7 +6,7 @@ engineering CAN bus messages in a 2014 Toyota Corolla S
 Usage
 ------
 
-1. Either create a virtual interface with the provided script `sudo ./ makevcan0.sh` or set up a physical interface
+1. Either create a virtual interface with the provided script `sudo ./ make_vcan0.sh` or set up a physical interface
 2. run `./corollahack [interface name]`
 3. If using vcan0, use candump to dump a sample log to the virtual interface
 4. If using physical can0, attach CANtact or similar supported device to

@@ -1,0 +1,42 @@
+To do that, first create and bring up a new virtual interface with:
+
+# modprobe vcan
+# ip link add vcan0 type vcan
+# ip link set vcan0 up
+
+canplayer vcan0=can0 < candump-2013-05-06_190603.log
+
+If you recorded a video stream of the car while dumping, this is a good time to find some way to synchronize it, possibly by cutting the video to the start of dumping. What I actually did was using the -ss option of mplayer to get it to the right point, and start it simultaneously with candump:
+
+$ canplayer  < candump-2013-05-06_190603.log & mplayer SMOV0087.AVI -ss 1:17
+
+This is how to instruct candump to save all the received packets for offline analysis:
+
+$ candump -l can0,0:0,#FFFFFFFF
+Disabled standard output while logging.
+
+Enabling Logfile 'candump-2013-05-06_190603.log'
+This leads to a log file with a series precisely timestamped packet dumps:
+
+$ head -n5 candump-2013-05-06_190603.log
+(1367859965.231495) can0 440#4000800000000000
+(1367859965.249499) can0 442#4200800000000000
+(1367859965.330495) can0 440#4001800000000000
+(1367859965.335500) can0 620#1080000000400080
+(1367859965.349499) can0 442#4201800000000000
+
+
+This is how you set the can0 interface at 500kbps in listen only mode:
+
+# ip link set can0 type can bitrate 500000 listen-only on
+If there are no errors you can now bring the interface up and start dumping frames:
+
+# ip link set can0 up
+# candump -cae can0,0:0,#FFFFFFFF
+At this point, you are receiving everything that is happening on the bus, including errors. You should try doing something on the car, like closing a door or turning on the ignition.
+
+If your bitrate is wrong, you should receive a stream of errors from the CAN bus interface:
+
+$ candump -cae can0,0:0,#FFFFFFFF
+  can0  20000008  [8] 00 00 04 00 00 00 00 00   ERRORFRAME
+        protocol-violation{{bit-stuffing-error}{}}

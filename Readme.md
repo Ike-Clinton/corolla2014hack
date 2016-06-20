@@ -3,6 +3,14 @@ Corolla2014hack
 Corolla2014hack is a program designed to read, inject, and aid in reverse
 engineering CAN bus messages in a 2014 Toyota Corolla S
 
+Installing and Compiling
+---------
+1. `git clone https://github.com/Ike-Clinton/corolla2014hack.git`
+2. `cd corolla2014hack`
+3. `apt-get install libncurses5-dev`
+4. `gcc -o corollahack corollahack.c -lncurses`
+
+
 Usage
 ------
 

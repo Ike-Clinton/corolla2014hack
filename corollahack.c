@@ -1,3 +1,5 @@
+
+
 /*
  * Copyright 2013 Fabio Baltieri <fabio.baltieri@gmail.com>
  * Modified 2016 by Ike Clinton  <ikeclinton@gmail.com>
@@ -54,8 +56,8 @@ union toyoframe {
 	} unkb4;
 	struct __packed {
 		uint8_t unk1;
-		uint8_t angle_8;
-		uint8_t angle_4;
+		int8_t angle_8;
+		int8_t angle_4;
 	} steer_angle;
 	struct __packed {
 		uint8_t flags;
@@ -63,9 +65,8 @@ union toyoframe {
 		uint8_t _pad1;
 		uint8_t _pad2;
 		uint8_t _pad3;
-		uint8_t _pad4;
-		uint8_t _pad5;
-		uint8_t _pad6;
+		uint8_t brake_pct_a;
+		uint8_t bracke_pct_b;
 	} brake;
 	struct __packed {
 		uint8_t flags0;
@@ -144,9 +145,11 @@ static void process_one(struct can_frame *frm)
 	case TOY_BRAKE:
 		move(4, 1);
 		clrtoeol();
-		mvprintw(4, 1, "brake: flags=%02x [%s]",
+		mvprintw(4, 1, "brake: flags=%02x [%s] brake_pct=%3hX",
 				toy->brake.flags,
-				(toy->brake.flags) ? "ON" : "  ");
+				(toy->brake.flags) ? "ON" : "  ",
+				be16toh(toy->brake.brake_pct)
+				);	
 		break;
 	case TOY_THROTTLE:
 		move(5, 1);
@@ -174,9 +177,9 @@ static void process_one(struct can_frame *frm)
 		move(i, 1);
 		clrtoeol();
 		mvprintw(i, 1, "steering angle: first 8 bits=%5d last four bits=%5d total=%3d",
-				be8toh(toy->steer_angle.angle_8),
-				be8toh(toy->steer_angle.angle_4),
-				be16toh(toy->steer_angle.angle_8) + be16toh(toy->steer_angle.angle_4));
+				be16toh(toy->steer_angle.angle_8),
+				be16toh(toy->steer_angle.angle_4),
+				(be16toh(toy->steer_angle.angle_8) + be16toh(toy->steer_angle.angle_4)));
 		break;
 	case TOY_FUEL_USAGE:
 		move(7, 1);

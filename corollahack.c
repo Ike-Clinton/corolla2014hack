@@ -33,6 +33,7 @@ enum frame_ids {
 	TOY_THROTTLE = 0x2c1,
 	TOY_ENGINE = 0x2c4,
 	TOY_FUEL_USAGE = 0x398,
+	TOY_STEER_ANGLE = 0x025,
 };
 
 #define UNKNOWN_COUNT 1024
@@ -51,6 +52,11 @@ union toyoframe {
 		uint16_t speed;
 		uint8_t distance_b;
 	} unkb4;
+	struct __packed {
+		uint8_t unk1;
+		uint8_t angle_8;
+		uint8_t angle_4;
+	} steer_angle;
 	struct __packed {
 		uint8_t flags;
 		uint8_t _pad0;
@@ -162,6 +168,15 @@ static void process_one(struct can_frame *frm)
 				toy->engine.unk1,
 				toy->engine.unk2
 				);
+		break;
+	case TOY_STEER_ANGLE:
+		i = (frm->can_id == TOY_STEER_ANGLE) ? 1 : 2;
+		move(i, 1);
+		clrtoeol();
+		mvprintw(i, 1, "steering angle: first 8 bits=%5d last four bits=%5d total=%3d",
+				be8toh(toy->steer_angle.angle_8),
+				be8toh(toy->steer_angle.angle_4),
+				be16toh(toy->steer_angle.angle_8) + be16toh(toy->steer_angle.angle_4));
 		break;
 	case TOY_FUEL_USAGE:
 		move(7, 1);

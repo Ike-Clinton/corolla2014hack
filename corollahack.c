@@ -64,9 +64,9 @@ union toyoframe {
 		uint8_t _pad0;
 		uint8_t _pad1;
 		uint8_t _pad2;
-		uint8_t _pad3;
-		uint8_t brake_pct_a;
-		uint8_t bracke_pct_b;
+		uint16_t brake_pct_a;
+		uint8_t brake_pct_b;
+		uint8_t brake_pct_c;
 	} brake;
 	struct __packed {
 		uint8_t flags0;
@@ -145,10 +145,14 @@ static void process_one(struct can_frame *frm)
 	case TOY_BRAKE:
 		move(4, 1);
 		clrtoeol();
-		mvprintw(4, 1, "brake: flags=%02x [%s] brake_pct=%3hX",
-				toy->brake.flags,
+		// Brake percentage scaling value is a factor of 10
+		short brake_scaling_value = 10;
+		short brake_pct = be16toh(toy->brake.brake_pct_a);
+		brake_pct /= brake_scaling_value;
+		mvprintw(4, 1, "brake: flags=%02x [%s] brake_pct=%3hu",
+				toy->brake.flags, 	
 				(toy->brake.flags) ? "ON" : "  ",
-				be16toh(toy->brake.brake_pct)
+				brake_pct
 				);	
 		break;
 	case TOY_THROTTLE:

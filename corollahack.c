@@ -27,6 +27,17 @@
 
 static int sk;
 
+// Helper function to extract bits a -> b from a byte
+short createMask(short a, short b)
+{
+   short r = 0;
+   short i;
+   for (i=a; i<=b; i++)
+       r |= 1 << i;
+
+   return r;
+}
+
 enum frame_ids {
 	TOY_WHEEL_SPEED_A = 0x0b0,
 	TOY_WHEEL_SPEED_B = 0x0b2,
@@ -55,9 +66,8 @@ union toyoframe {
 		uint8_t distance_b;
 	} unkb4;
 	struct __packed {
-		uint8_t unk1;
-		int8_t angle_8;
-		int8_t angle_4;
+		int16_t angle;
+		uint8_t _pad1;
 	} steer_angle;
 	struct __packed {
 		uint8_t flags;
@@ -180,10 +190,12 @@ static void process_one(struct can_frame *frm)
 		i = (frm->can_id == TOY_STEER_ANGLE) ? 1 : 2;
 		move(i, 1);
 		clrtoeol();
-		mvprintw(i, 1, "steering angle: first 8 bits=%5d last four bits=%5d total=%3d",
-				be16toh(toy->steer_angle.angle_8),
-				be16toh(toy->steer_angle.angle_4),
-				(be16toh(toy->steer_angle.angle_8) + be16toh(toy->steer_angle.angle_4)));
+		short angle = be16toh(toy->steer_angle.angle);
+		short angle_scaling_value = -1.5;
+		angle *= angle_scaling_value;
+		
+		mvprintw(i, 1, "steering angle=%3hhi",
+				angle);
 		break;
 	case TOY_FUEL_USAGE:
 		move(7, 1);
